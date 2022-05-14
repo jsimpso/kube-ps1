@@ -56,6 +56,7 @@ fi
 # Test whether kubeconfig is a symlink
 if [ -L ~/.kube/config ]; then
   KUBECONFIG_IS_LINK=true
+  ACTIVE_CONFIG_CACHE="$(basename $(readlink ~/.kube/config))"
 else
   KUBECONFIG_IS_LINK=false
 fi
@@ -240,6 +241,16 @@ _kube_ps1_update_cache() {
     fi
   done
 
+  # if ~./kube/config is a symlink and has been updated,
+  # refetch.
+  if [[ "${KUBECONFIG_IS_LINK}" == true ]]; then
+    ACTIVE_CONFIG="$(basename $(readlink ~/.kube/config))"
+    if [[ "${ACTIVE_CONFIG_CACHE}" != "${ACTIVE_CONFIG}" ]]; then
+      _kube_ps1_get_context_ns
+      return
+    fi
+  fi
+  
   return $return_code
 }
 
