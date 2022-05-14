@@ -35,6 +35,7 @@ KUBE_PS1_DIVIDER="${KUBE_PS1_DIVIDER-:}"
 KUBE_PS1_SUFFIX="${KUBE_PS1_SUFFIX-)}"
 
 KUBE_PS1_SYMBOL_COLOR="${KUBE_PS1_SYMBOL_COLOR-blue}"
+KUBE_PS1_CONFIG_COLOR="${KUBE_PS1_CONFIG_COLOR-green}"
 KUBE_PS1_CTX_COLOR="${KUBE_PS1_CTX_COLOR-red}"
 KUBE_PS1_NS_COLOR="${KUBE_PS1_NS_COLOR-cyan}"
 KUBE_PS1_BG_COLOR="${KUBE_PS1_BG_COLOR}"
@@ -52,6 +53,12 @@ elif [ "${BASH_VERSION-}" ]; then
   KUBE_PS1_SHELL="bash"
 fi
 
+# Test whether kubeconfig is a symlink
+if [ -L ~/.kube/config ]; then
+  KUBECONFIG_IS_LINK=true
+else
+  KUBECONFIG_IS_LINK=false
+fi
 _kube_ps1_init() {
   [[ -f "${KUBE_PS1_DISABLE_PATH}" ]] && KUBE_PS1_ENABLED=off
 
@@ -354,7 +361,10 @@ kube_ps1() {
 
   # Symbol
   KUBE_PS1+="$(_kube_ps1_color_fg $KUBE_PS1_SYMBOL_COLOR)$(_kube_ps1_symbol)${KUBE_PS1_RESET_COLOR}"
-
+  if [[ "${KUBECONFIG_IS_LINK}" == true ]]; then
+      ACTIVE_CONFIG="$(basename $(readlink ~/.kube/config))"
+      KUBE_PS1+="$(_kube_ps1_color_fg $KUBE_PS1_CONFIG_COLOR)${ACTIVE_CONFIG}${KUBE_PS1_RESET_COLOR}"
+  fi
   if [[ -n "${KUBE_PS1_SEPARATOR}" ]] && [[ "${KUBE_PS1_SYMBOL_ENABLE}" == true ]]; then
     KUBE_PS1+="${KUBE_PS1_SEPARATOR}"
   fi
