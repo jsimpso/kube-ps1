@@ -246,6 +246,7 @@ _kube_ps1_update_cache() {
   if [[ "${KUBECONFIG_IS_LINK}" == true ]]; then
     ACTIVE_CONFIG="$(basename $(readlink ~/.kube/config))"
     if [[ "${ACTIVE_CONFIG_CACHE}" != "${ACTIVE_CONFIG}" ]]; then
+      ACTIVE_CONFIG_CACHE=${ACTIVE_CONFIG}
       _kube_ps1_get_context_ns
       return
     fi
